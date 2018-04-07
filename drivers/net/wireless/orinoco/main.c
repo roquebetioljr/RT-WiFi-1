@@ -2272,18 +2272,14 @@ int orinoco_if_add(struct orinoco_private *priv,
 #endif
 	/* Default to standard ops if not set */
 	if (ops)
-		netdev_attach_ops(dev, ops);
+		dev->netdev_ops = ops;
 	else
-		netdev_attach_ops(dev, &orinoco_netdev_ops);
+		dev->netdev_ops = &orinoco_netdev_ops;
 
 	/* we use the default eth_mac_addr for setting the MAC addr */
 
 	/* Reserve space in skb for the SNAP header */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26))
 	dev->needed_headroom = ENCAPS_OVERHEAD;
-#else
-	dev->hard_header_len += ENCAPS_OVERHEAD;
-#endif
 
 	netif_carrier_off(dev);
 
@@ -2325,8 +2321,6 @@ void free_orinocodev(struct orinoco_private *priv)
 	struct orinoco_rx_data *rx_data, *temp;
 	struct orinoco_scan_data *sd, *sdtemp;
 
-	wiphy_unregister(wiphy);
-
 	/* If the tasklet is scheduled when we call tasklet_kill it
 	 * will run one final time. However the tasklet will only
 	 * drain priv->rx_list if the hw is still available. */
@@ -2346,7 +2340,7 @@ void free_orinocodev(struct orinoco_private *priv)
 	list_for_each_entry_safe(sd, sdtemp, &priv->scan_list, list) {
 		list_del(&sd->list);
 
-		if ((sd->len > 0) && sd->buf)
+		if (sd->len > 0)
 			kfree(sd->buf);
 		kfree(sd);
 	}

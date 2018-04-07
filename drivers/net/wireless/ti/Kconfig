@@ -1,5 +1,4 @@
 menuconfig WL_TI
-	depends on !BACKPORT_KERNEL_2_6_30
 	bool "TI Wireless LAN support"
 	---help---
 	  This section contains support for all the wireless drivers

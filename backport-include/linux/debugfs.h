@@ -1,29 +1,42 @@
-#ifndef __BACKPORT_LINUX_DEBUGFS_H
-#define __BACKPORT_LINUX_DEBUGFS_H
+#ifndef __BACKPORT_DEBUGFS_H_
+#define __BACKPORT_DEBUGFS_H_
 #include_next <linux/debugfs.h>
 #include <linux/version.h>
+#include <linux/device.h>
+#include <generated/utsrelease.h>
 
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
-#define debugfs_remove_recursive LINUX_BACKPORT(debugfs_remove_recursive)
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,19,0)
+#define debugfs_create_devm_seqfile LINUX_BACKPORT(debugfs_create_devm_seqfile)
 #if defined(CONFIG_DEBUG_FS)
-void debugfs_remove_recursive(struct dentry *dentry);
+struct dentry *debugfs_create_devm_seqfile(struct device *dev, const char *name,
+					   struct dentry *parent,
+					   int (*read_fn)(struct seq_file *s,
+							  void *data));
 #else
-static inline void debugfs_remove_recursive(struct dentry *dentry)
-{ }
-#endif
-#endif /* < 2.6.27 */
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
-#if RHEL_RELEASE_CODE < RHEL_RELEASE_VERSION(6,4)
-static inline struct dentry *debugfs_create_x64(const char *name, umode_t mode,
-						struct dentry *parent,
-						u64 *value)
+static inline struct dentry *debugfs_create_devm_seqfile(struct device *dev,
+							 const char *name,
+							 struct dentry *parent,
+					   int (*read_fn)(struct seq_file *s,
+							  void *data))
 {
-	return debugfs_create_u64(name, mode, parent, value);
+	return ERR_PTR(-ENODEV);
+}
+#endif /* CONFIG_DEBUG_FS */
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(3,19,0) */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
+#define debugfs_create_bool LINUX_BACKPORT(debugfs_create_bool)
+#ifdef CONFIG_DEBUG_FS
+struct dentry *debugfs_create_bool(const char *name, umode_t mode,
+				   struct dentry *parent, bool *value);
+#else
+static inline struct dentry *
+debugfs_create_bool(const char *name, umode_t mode,
+		    struct dentry *parent, bool *value)
+{
+	return ERR_PTR(-ENODEV);
 }
 #endif
-#endif
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0) */
 
-#endif /* __BACKPORT_LINUX_DEBUGFS_H */
+#endif /* __BACKPORT_DEBUGFS_H_ */

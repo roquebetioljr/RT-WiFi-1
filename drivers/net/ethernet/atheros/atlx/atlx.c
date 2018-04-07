@@ -149,7 +149,7 @@ static void atlx_set_multi(struct net_device *netdev)
 
 	/* compute mc addresses' hash value ,and put it into hash table */
 	netdev_for_each_mc_addr(ha, netdev) {
-		hash_value = atlx_hash_mc_addr(hw, mc_addr(ha));
+		hash_value = atlx_hash_mc_addr(hw, ha->addr);
 		atlx_hash_set(hw, hash_value);
 	}
 }
@@ -250,7 +250,6 @@ static void atlx_restore_vlan(struct atlx_adapter *adapter)
 	atlx_vlan_mode(adapter->netdev, adapter->netdev->features);
 }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39))
 static netdev_features_t atlx_fix_features(struct net_device *netdev,
 	netdev_features_t features)
 {
@@ -276,6 +275,5 @@ static int atlx_set_features(struct net_device *netdev,
 
 	return 0;
 }
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)) */
 
 #endif /* ATLX_C */

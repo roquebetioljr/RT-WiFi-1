@@ -16,8 +16,11 @@
 #include <linux/module.h>
 #include "hid-ids.h"
 #include <linux/netdevice.h>
+#include <linux/random.h>
 #include <linux/of.h>
 #include <linux/mm.h>
+#include <linux/pci.h>
+#include <linux/pci_regs.h>
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,7,8))
 void netdev_set_default_ethtool_ops(struct net_device *dev,
@@ -330,37 +333,24 @@ bool hid_ignore(struct hid_device *hdev)
 			return true;
 		break;
 	case USB_VENDOR_ID_JESS:
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,28))
 		if (hdev->product == USB_DEVICE_ID_JESS_YUREX &&
 				hdev->type == HID_TYPE_USBNONE)
 			return true;
-#else
-		if (hdev->product == USB_DEVICE_ID_JESS_YUREX)
-			return true;
-#endif
 		break;
 	case USB_VENDOR_ID_DWAV:
 		/* These are handled by usbtouchscreen. hdev->type is probably
 		 * HID_TYPE_USBNONE, but we say !HID_TYPE_USBMOUSE to match
 		 * usbtouchscreen. */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,28))
 		if ((hdev->product == USB_DEVICE_ID_EGALAX_TOUCHCONTROLLER ||
 		     hdev->product == USB_DEVICE_ID_DWAV_TOUCHCONTROLLER) &&
 		    hdev->type != HID_TYPE_USBMOUSE)
 			return true;
-#else
-		if (hdev->product == USB_DEVICE_ID_EGALAX_TOUCHCONTROLLER ||
-		     hdev->product == USB_DEVICE_ID_DWAV_TOUCHCONTROLLER)
-			return true;
-#endif
 		break;
 	}
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,28))
 	if (hdev->type == HID_TYPE_USBMOUSE &&
 			hid_match_id(hdev, hid_mouse_ignore_list))
 		return true;
-#endif
 
 	return !!hid_match_id(hdev, hid_ignore_list);
 }
@@ -421,35 +411,38 @@ int vm_iomap_memory(struct vm_area_struct *vma, phys_addr_t start, unsigned long
 }
 EXPORT_SYMBOL_GPL(vm_iomap_memory);
 
-#ifdef CONFIG_OF
 /**
- * of_find_property_value_of_size
- *
- * @np:		device node from which the property value is to be read.
- * @propname:	name of the property to be searched.
- * @len:	requested length of property value
- *
- * Search for a property in a device node and valid the requested size.
- * Returns the property value on success, -EINVAL if the property does not
- *  exist, -ENODATA if property does not have a value, and -EOVERFLOW if the
- * property data isn't large enough.
- *
+ *	prandom_bytes - get the requested number of pseudo-random bytes
+ *	@buf: where to copy the pseudo-random bytes to
+ *	@bytes: the requested number of bytes
  */
-static void *of_find_property_value_of_size(const struct device_node *np,
-			const char *propname, u32 len)
+void prandom_bytes(void *buf, int bytes)
 {
-	struct property *prop = of_find_property(np, propname, NULL);
+	unsigned char *p = buf;
+	int i;
 
-	if (!prop)
-		return ERR_PTR(-EINVAL);
-	if (!prop->value)
-		return ERR_PTR(-ENODATA);
-	if (len > prop->length)
-		return ERR_PTR(-EOVERFLOW);
+	for (i = 0; i < round_down(bytes, sizeof(u32)); i += sizeof(u32)) {
+		u32 random = random32();
+		int j;
 
-	return prop->value;
+		for (j = 0; j < sizeof(u32); j++) {
+			p[i + j] = random;
+			random >>= BITS_PER_BYTE;
+		}
+	}
+
+	if (i < bytes) {
+		u32 random = random32();
+
+		for (; i < bytes; i++) {
+			p[i] = random;
+			random >>= BITS_PER_BYTE;
+		}
+	}
 }
+EXPORT_SYMBOL_GPL(prandom_bytes);
 
+#ifdef CONFIG_OF
 /**
  * of_property_read_u8_array - Find and read an array of u8 from a property.
  *
@@ -483,3 +476,35 @@ int of_property_read_u8_array(const struct device_node *np,
 }
 EXPORT_SYMBOL_GPL(of_property_read_u8_array);
 #endif /* CONFIG_OF */
+
+#ifdef CONFIG_PCI_IOV
+/**
+ * pci_sriov_set_totalvfs -- reduce the TotalVFs available
+ * @dev: the PCI PF device
+ * @numvfs: number that should be used for TotalVFs supported
+ *
+ * Should be called from PF driver's probe routine with
+ * device's mutex held.
+ *
+ * Returns 0 if PF is an SRIOV-capable device and
+ * value of numvfs valid. If not a PF return -ENOSYS;
+ * if numvfs is invalid return -EINVAL;
+ * if VFs already enabled, return -EBUSY.
+ */
+int pci_sriov_set_totalvfs(struct pci_dev *dev, u16 numvfs)
+{
+	if (!dev->is_physfn)
+		return -ENOSYS;
+	if (numvfs > dev->sriov->total_VFs)
+		return -EINVAL;
+
+	/* Shouldn't change if VFs already enabled */
+	if (dev->sriov->ctrl & PCI_SRIOV_CTRL_VFE)
+		return -EBUSY;
+	else
+		dev->sriov->driver_max_VFs = numvfs;
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(pci_sriov_set_totalvfs);
+#endif /* CONFIG_PCI_IOV */

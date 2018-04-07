@@ -7,9 +7,7 @@ config NET_VENDOR_ATHEROS
 	default y
 	depends on PCI
 	---help---
-	  If you have a network (Ethernet) card belonging to this class, say Y
-	  and read the Ethernet-HOWTO, available from
-	  <http://www.tldp.org/docs.html#howto>.
+	  If you have a network (Ethernet) card belonging to this class, say Y.
 
 	  Note that the answer to this question doesn't directly affect the
 	  kernel: saying N will just cause the configurator to skip all
@@ -23,7 +21,7 @@ config ATL2
 	depends on m
 	depends on PCI
 	depends on CRC32
-	select BACKPORT_MII
+	select BPAUTO_MII
 	---help---
 	  This driver supports the Atheros L2 fast ethernet adapter.
 
@@ -35,7 +33,7 @@ config ATL1
 	depends on m
 	depends on PCI
 	depends on CRC32
-	select BACKPORT_MII
+	select BPAUTO_MII
 	---help---
 	  This driver supports the Atheros/Attansic L1 gigabit ethernet
 	  adapter.
@@ -44,12 +42,11 @@ config ATL1
 	  will be called atl1.
 
 config ATL1E
-	depends on !BACKPORT_KERNEL_2_6_26
 	tristate "Atheros L1E Gigabit Ethernet support"
 	depends on m
 	depends on PCI
 	depends on CRC32
-	select BACKPORT_MII
+	select BPAUTO_MII
 	---help---
 	  This driver supports the Atheros L1E gigabit ethernet adapter.
 
@@ -57,12 +54,12 @@ config ATL1E
 	  will be called atl1e.
 
 config ATL1C
-	depends on !BACKPORT_KERNEL_3_5
+	depends on !KERNEL_3_5
 	tristate "Atheros L1C Gigabit Ethernet support"
 	depends on m
 	depends on PCI
 	depends on CRC32
-	select BACKPORT_MII
+	select BPAUTO_MII
 	---help---
 	  This driver supports the Atheros L1C gigabit ethernet adapter.
 
@@ -70,7 +67,6 @@ config ATL1C
 	  will be called atl1c.
 
 config ALX
-	depends on !BACKPORT_KERNEL_2_6_31
 	tristate "Qualcomm Atheros AR816x/AR817x support"
 	depends on m
 	depends on PCI

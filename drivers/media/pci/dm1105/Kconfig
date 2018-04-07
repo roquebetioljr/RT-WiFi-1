@@ -1,4 +1,5 @@
 config DVB_DM1105
+	depends on !KERNEL_3_8
 	tristate "SDMC DM1105 based PCI cards"
 	depends on m
 	depends on DVB_CORE && PCI && I2C

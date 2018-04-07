@@ -17,12 +17,11 @@ obj-$(CPTCFG_RADIO_RTRACK) += radio-aimslab.o
 obj-$(CPTCFG_RADIO_ZOLTRIX) += radio-zoltrix.o
 obj-$(CPTCFG_RADIO_GEMTEK) += radio-gemtek.o
 obj-$(CPTCFG_RADIO_TRUST) += radio-trust.o
-obj-$(CPTCFG_I2C_SI4713) += si4713-i2c.o
-obj-$(CPTCFG_RADIO_SI4713) += radio-si4713.o
 obj-$(CPTCFG_RADIO_SI476X) += radio-si476x.o
 obj-$(CPTCFG_RADIO_MIROPCM20) += radio-miropcm20.o
 obj-$(CPTCFG_USB_DSBR) += dsbr100.o
 obj-$(CPTCFG_RADIO_SI470X) += si470x/
+obj-$(CPTCFG_RADIO_SI4713) += si4713/
 obj-$(CPTCFG_USB_MR800) += radio-mr800.o
 obj-$(CPTCFG_USB_KEENE) += radio-keene.o
 obj-$(CPTCFG_USB_MA901) += radio-ma901.o
@@ -33,6 +32,7 @@ obj-$(CPTCFG_RADIO_TIMBERDALE) += radio-timb.o
 obj-$(CPTCFG_RADIO_WL1273) += radio-wl1273.o
 obj-$(CPTCFG_RADIO_WL128X) += wl128x/
 obj-$(CPTCFG_RADIO_TEA575X) += tea575x.o
+obj-$(CPTCFG_USB_RAREMONO) += radio-raremono.o
 
 shark2-objs := radio-shark2.o radio-tea5777.o
 

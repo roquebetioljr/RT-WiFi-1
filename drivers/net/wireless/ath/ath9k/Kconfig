@@ -5,6 +5,8 @@ config ATH9K_COMMON
 	tristate
 	depends on m
 	select ATH_COMMON
+	depends on DEBUG_FS
+	depends on RELAY
 config ATH9K_DFS_DEBUGFS
 	def_bool y
 	depends on ATH9K_DEBUGFS && ATH9K_DFS_CERTIFIED
@@ -23,8 +25,8 @@ config ATH9K
 	depends on MAC80211 && HAS_DMA
 	select ATH9K_HW
 	select MAC80211_LEDS
-	select BACKPORT_LEDS_CLASS
-	select BACKPORT_NEW_LEDS
+	select BPAUTO_LEDS_CLASS
+	select BPAUTO_NEW_LEDS
 	select ATH9K_COMMON
 	---help---
 	  This module adds support for wireless adapters based on
@@ -48,7 +50,6 @@ config ATH9K_PCI
 	  Say Y, if you have a compatible PCI/PCIe wireless card.
 
 config ATH9K_AHB
-	depends on !BACKPORT_KERNEL_2_6_30
 	bool "Atheros ath9k AHB bus support"
 	depends on ATH9K
 	default n
@@ -69,6 +70,14 @@ config ATH9K_DEBUGFS
 
 	  Also required for changing debug message flags at run time.
 
+config ATH9K_STATION_STATISTICS
+	bool "Detailed station statistics"
+	depends on ATH9K && ATH9K_DEBUGFS && DEBUG_FS
+	select MAC80211_DEBUGFS
+	default n
+	---help---
+	  This option enables detailed statistics for association stations.
+
 config ATH9K_DFS_CERTIFIED
 	bool "Atheros DFS support for certified platforms"
 	depends on ATH9K && CFG80211_CERTIFICATION_ONUS
@@ -88,9 +97,18 @@ config ATH9K_DFS_CERTIFIED
 	  developed. At this point enabling this option won't do anything
 	  except increase code size.
 
+config ATH9K_DYNACK
+	bool "Atheros ath9k ACK timeout estimation algorithm (EXPERIMENTAL)"
+	depends on ATH9K
+	default n
+	---help---
+	  This option enables ath9k dynamic ACK timeout estimation algorithm
+	  based on ACK frame RX timestamp, TX frame timestamp and frame
+	  duration
+
 config ATH9K_TX99
 	bool "Atheros ath9k TX99 testing support"
-	depends on CFG80211_CERTIFICATION_ONUS
+	depends on ATH9K_DEBUGFS && CFG80211_CERTIFICATION_ONUS
 	default n
 	---help---
 	  Say N. This should only be enabled on systems undergoing
@@ -108,17 +126,13 @@ config ATH9K_TX99
 	  be evaluated to meet the RF exposure limits set forth in the
 	  governmental SAR regulations.
 
-config ATH9K_LEGACY_RATE_CONTROL
-	bool "Atheros ath9k rate control"
-	depends on ATH9K
+config ATH9K_WOW
+	bool "Wake on Wireless LAN support (EXPERIMENTAL)"
+	depends on ATH9K && PM
 	default n
 	---help---
-	  Say Y, if you want to use the ath9k specific rate control
-	  module instead of minstrel_ht. Be warned that there are various
-	  issues with the ath9k RC and minstrel is a more robust algorithm.
-	  Note that even if this option is selected, "ath9k_rate_control"
-	  has to be passed to mac80211 using the module parameter,
-	  ieee80211_default_rc_algo.
+	  This option enables Wake on Wireless LAN support for certain cards.
+	  Currently, AR9462 is supported.
 
 config ATH9K_RFKILL
 	bool "Atheros ath9k rfkill support" if EXPERT
@@ -130,14 +144,28 @@ config ATH9K_RFKILL
 	  seconds. Turn off to save power, but enable it if you have
 	  a platform that can toggle the RF-Kill GPIO.
 
+config ATH9K_CHANNEL_CONTEXT
+       bool "Channel Context support"
+       depends on ATH9K
+       default n
+       ---help---
+         This option enables channel context support in ath9k, which is needed
+	 for multi-channel concurrency. Enable this if P2P PowerSave support
+	 is required.
+
+config ATH9K_PCOEM
+	bool "Atheros ath9k support for PC OEM cards" if EXPERT
+	depends on ATH9K
+	default y
+
 config ATH9K_HTC
        tristate "Atheros HTC based wireless cards support"
        depends on m
        depends on USB && MAC80211
        select ATH9K_HW
        select MAC80211_LEDS
-       select BACKPORT_LEDS_CLASS
-       select BACKPORT_NEW_LEDS
+       select BPAUTO_LEDS_CLASS
+       select BPAUTO_NEW_LEDS
        select ATH9K_COMMON
        ---help---
 	 Support for Atheros HTC based cards.

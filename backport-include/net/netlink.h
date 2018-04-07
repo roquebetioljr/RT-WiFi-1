@@ -2,6 +2,7 @@
 #define __BACKPORT_NET_NETLINK_H
 #include_next <net/netlink.h>
 #include <linux/version.h>
+#include <linux/in6.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
 /**
@@ -87,11 +88,7 @@ static inline s8 nla_get_s8(const struct nlattr *nla)
  * @nla: s64 netlink attribute
  */
 #define nla_get_s64 LINUX_BACKPORT(nla_get_s64)
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29))
 static inline s64 nla_get_s64(const struct nlattr *nla)
-#else
-static inline s64 nla_get_s64(struct nlattr *nla)
-#endif
 {
 	s64 tmp;
 
@@ -129,5 +126,67 @@ static inline int nla_put_be64(struct sk_buff *skb, int attrtype, __be64 value)
 	return nla_put(skb, attrtype, sizeof(__be64), &value);
 }
 #endif /* < 3.5 */
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
+#define NLA_S8 (NLA_BINARY + 1)
+#define NLA_S16 (NLA_BINARY + 2)
+#define NLA_S32 (NLA_BINARY + 3)
+#define NLA_S64 (NLA_BINARY + 4)
+#define __NLA_TYPE_MAX (NLA_BINARY + 5)
+
+#undef NLA_TYPE_MAX
+#define NLA_TYPE_MAX (__NLA_TYPE_MAX - 1)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,1,0)
+#define nla_put_in_addr LINUX_BACKPORT(nla_put_in_addr)
+static inline int nla_put_in_addr(struct sk_buff *skb, int attrtype,
+				  __be32 addr)
+{
+	return nla_put_be32(skb, attrtype, addr);
+}
+
+#define nla_put_in6_addr LINUX_BACKPORT(nla_put_in6_addr)
+static inline int nla_put_in6_addr(struct sk_buff *skb, int attrtype,
+				   const struct in6_addr *addr)
+{
+	return nla_put(skb, attrtype, sizeof(*addr), addr);
+}
+
+static inline __be32 nla_get_in_addr(const struct nlattr *nla)
+{
+	return *(__be32 *) nla_data(nla);
+}
+
+static inline struct in6_addr nla_get_in6_addr(const struct nlattr *nla)
+{
+	struct in6_addr tmp;
+
+	nla_memcpy(&tmp, nla, sizeof(tmp));
+	return tmp;
+}
+#endif /* < 4.1 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
+/**
+ * nla_get_le32 - return payload of __le32 attribute
+ * @nla: __le32 netlink attribute
+ */
+#define nla_get_le32 LINUX_BACKPORT(nla_get_le32)
+static inline __le32 nla_get_le32(const struct nlattr *nla)
+{
+	return *(__le32 *) nla_data(nla);
+}
+
+/**
+ * nla_get_le64 - return payload of __le64 attribute
+ * @nla: __le64 netlink attribute
+ */
+#define nla_get_le64 LINUX_BACKPORT(nla_get_le64)
+static inline __le64 nla_get_le64(const struct nlattr *nla)
+{
+	return *(__le64 *) nla_data(nla);
+}
+#endif /* < 4.4 */
 
 #endif /* __BACKPORT_NET_NETLINK_H */

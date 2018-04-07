@@ -1,8 +1,11 @@
+#ifndef __BACKPORT_LINUX_U64_STATS_SYNC_H
+#define __BACKPORT_LINUX_U64_STATS_SYNC_H
+
+#include <linux/version.h>
+#include <generated/utsrelease.h>
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,6,0))
 #include_next <linux/u64_stats_sync.h>
 #else
-#ifndef _LINUX_U64_STATS_SYNC_H
-#define _LINUX_U64_STATS_SYNC_H
 
 /*
  * To properly implement 64bits network statistics on 32bit and 64bit hosts,
@@ -30,8 +33,8 @@
  *    (On UP, there is no seqcount_t protection, a reader allowing interrupts could
  *     read partial values)
  *
- * 7) For softirq uses, readers can use u64_stats_fetch_begin_bh() and
- *    u64_stats_fetch_retry_bh() helpers
+ * 7) For softirq uses, readers can use u64_stats_fetch_begin_irq() and
+ *    u64_stats_fetch_retry_irq() helpers
  *
  * Usage :
  *
@@ -109,36 +112,43 @@ static inline bool u64_stats_fetch_retry(const struct u64_stats_sync *syncp,
 #endif
 }
 
-/*
- * In case softirq handlers can update u64 counters, readers can use following helpers
- * - SMP 32bit arches use seqcount protection, irq safe.
- * - UP 32bit must disable BH.
- * - 64bit have no problem atomically reading u64 values, irq safe.
- */
-static inline unsigned int u64_stats_fetch_begin_bh(const struct u64_stats_sync *syncp)
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3,6,0)) */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0) && \
+    !(LINUX_VERSION_CODE == KERNEL_VERSION(3,13,11) && UTS_UBUNTU_RELEASE_ABI > 30)
+static inline unsigned int u64_stats_fetch_begin_irq(const struct u64_stats_sync *syncp)
 {
 #if BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	return read_seqcount_begin(&syncp->seq);
 #else
 #if BITS_PER_LONG==32
-	local_bh_disable();
+	local_irq_disable();
 #endif
 	return 0;
 #endif
 }
 
-static inline bool u64_stats_fetch_retry_bh(const struct u64_stats_sync *syncp,
+static inline bool u64_stats_fetch_retry_irq(const struct u64_stats_sync *syncp,
 					 unsigned int start)
 {
 #if BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	return read_seqcount_retry(&syncp->seq, start);
 #else
 #if BITS_PER_LONG==32
-	local_bh_enable();
+	local_irq_enable();
 #endif
 	return false;
 #endif
 }
 
-#endif /* _LINUX_U64_STATS_SYNC_H */
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3,6,0)) */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,0)) */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,13,0)
+#if BITS_PER_LONG == 32 && defined(CONFIG_SMP)
+# define u64_stats_init(syncp)	seqcount_init(syncp.seq)
+#else
+# define u64_stats_init(syncp)	do { } while (0)
+#endif
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(3,13,0) */
+
+#endif /* __BACKPORT_LINUX_U64_STATS_SYNC_H */

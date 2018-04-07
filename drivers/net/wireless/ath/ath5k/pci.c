@@ -28,7 +28,7 @@
 #include "reg.h"
 
 /* Known PCI ids */
-static DEFINE_PCI_DEVICE_TABLE(ath5k_pci_id_table) = {
+static const struct pci_device_id ath5k_pci_id_table[] = {
 	{ PCI_VDEVICE(ATHEROS, 0x0207) }, /* 5210 early */
 	{ PCI_VDEVICE(ATHEROS, 0x0007) }, /* 5210 */
 	{ PCI_VDEVICE(ATHEROS, 0x0011) }, /* 5311 - this is on AHB bus !*/
@@ -326,9 +326,6 @@ static int ath5k_pci_resume(struct device *dev)
 	return 0;
 }
 
-compat_pci_suspend(ath5k_pci_suspend)
-compat_pci_resume(ath5k_pci_resume)
-
 static SIMPLE_DEV_PM_OPS(ath5k_pm_ops, ath5k_pci_suspend, ath5k_pci_resume);
 #define ATH5K_PM_OPS	(&ath5k_pm_ops)
 #else
@@ -340,12 +337,7 @@ static struct pci_driver ath5k_pci_driver = {
 	.id_table	= ath5k_pci_id_table,
 	.probe		= ath5k_pci_probe,
 	.remove		= ath5k_pci_remove,
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29))
 	.driver.pm	= ATH5K_PM_OPS,
-#elif defined(CONFIG_PM_SLEEP)
-	.suspend        = ath5k_pci_suspend_compat,
-	.resume         = ath5k_pci_resume_compat,
-#endif
 };
 
 module_pci_driver(ath5k_pci_driver);

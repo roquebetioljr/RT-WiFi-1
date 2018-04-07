@@ -40,7 +40,7 @@
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_core.h>
 
-#define VERSION "1.4"
+#define VERSION "1.5"
 
 static bool amp;
 
@@ -55,17 +55,12 @@ struct vhci_data {
 
 static int vhci_open_dev(struct hci_dev *hdev)
 {
-	set_bit(HCI_RUNNING, &hdev->flags);
-
 	return 0;
 }
 
 static int vhci_close_dev(struct hci_dev *hdev)
 {
 	struct vhci_data *data = hci_get_drvdata(hdev);
-
-	if (!test_and_clear_bit(HCI_RUNNING, &hdev->flags))
-		return 0;
 
 	skb_queue_purge(&data->readq);
 
@@ -85,9 +80,6 @@ static int vhci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 {
 	struct vhci_data *data = hci_get_drvdata(hdev);
 
-	if (!test_bit(HCI_RUNNING, &hdev->flags))
-		return -EBUSY;
-
 	memcpy(skb_push(skb, 1), &bt_cb(skb)->pkt_type, 1);
 	skb_queue_tail(&data->readq, skb);
 
@@ -95,10 +87,21 @@ static int vhci_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
 	return 0;
 }
 
-static int vhci_create_device(struct vhci_data *data, __u8 dev_type)
+static int vhci_create_device(struct vhci_data *data, __u8 opcode)
 {
 	struct hci_dev *hdev;
 	struct sk_buff *skb;
+	__u8 dev_type;
+
+	/* bits 0-1 are dev_type (BR/EDR or AMP) */
+	dev_type = opcode & 0x03;
+
+	if (dev_type != HCI_BREDR && dev_type != HCI_AMP)
+		return -EINVAL;
+
+	/* bits 2-5 are reserved (must be zero) */
+	if (opcode & 0x3c)
+		return -EINVAL;
 
 	skb = bt_skb_alloc(4, GFP_KERNEL);
 	if (!skb)
@@ -121,6 +124,14 @@ static int vhci_create_device(struct vhci_data *data, __u8 dev_type)
 	hdev->flush = vhci_flush;
 	hdev->send  = vhci_send_frame;
 
+	/* bit 6 is for external configuration */
+	if (opcode & 0x40)
+		set_bit(HCI_QUIRK_EXTERNAL_CONFIG, &hdev->quirks);
+
+	/* bit 7 is for raw device */
+	if (opcode & 0x80)
+		set_bit(HCI_QUIRK_RAW_DEVICE, &hdev->quirks);
+
 	if (hci_register_dev(hdev) < 0) {
 		BT_ERR("Can't register HCI device");
 		hci_free_dev(hdev);
@@ -132,7 +143,7 @@ static int vhci_create_device(struct vhci_data *data, __u8 dev_type)
 	bt_cb(skb)->pkt_type = HCI_VENDOR_PKT;
 
 	*skb_put(skb, 1) = 0xff;
-	*skb_put(skb, 1) = dev_type;
+	*skb_put(skb, 1) = opcode;
 	put_unaligned_le16(hdev->id, skb_put(skb, 2));
 	skb_queue_tail(&data->readq, skb);
 
@@ -140,24 +151,47 @@ static int vhci_create_device(struct vhci_data *data, __u8 dev_type)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
 static inline ssize_t vhci_get_user(struct vhci_data *data,
-				    const char __user *buf, size_t count)
+				    struct iov_iter *from)
 {
+	size_t len = iov_iter_count(from);
 	struct sk_buff *skb;
-	__u8 pkt_type, dev_type;
+	__u8 pkt_type, opcode;
 	int ret;
+#else
+static inline ssize_t vhci_get_user(struct vhci_data *data,
+				    const struct iovec *iov,
+				    unsigned long count)
+{
+	size_t len = iov_length(iov, count);
+	struct sk_buff *skb;
+	__u8 pkt_type, opcode;
+	unsigned long i;
+	int ret;
+#endif
 
-	if (count < 2 || count > HCI_MAX_FRAME_SIZE)
+	if (len < 2 || len > HCI_MAX_FRAME_SIZE)
 		return -EINVAL;
 
-	skb = bt_skb_alloc(count, GFP_KERNEL);
+	skb = bt_skb_alloc(len, GFP_KERNEL);
 	if (!skb)
 		return -ENOMEM;
 
-	if (copy_from_user(skb_put(skb, count), buf, count)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
+	if (copy_from_iter(skb_put(skb, len), len, from) != len) {
 		kfree_skb(skb);
 		return -EFAULT;
 	}
+#else
+	for (i = 0; i < count; i++) {
+		if (copy_from_user(skb_put(skb, iov[i].iov_len),
+				   iov[i].iov_base, iov[i].iov_len)) {
+			kfree_skb(skb);
+			return -EFAULT;
+		}
+	}
+#endif
 
 	pkt_type = *((__u8 *) skb->data);
 	skb_pull(skb, 1);
@@ -184,7 +218,7 @@ static inline ssize_t vhci_get_user(struct vhci_data *data,
 
 		cancel_delayed_work_sync(&data->open_timeout);
 
-		dev_type = *((__u8 *) skb->data);
+		opcode = *((__u8 *) skb->data);
 		skb_pull(skb, 1);
 
 		if (skb->len > 0) {
@@ -194,10 +228,7 @@ static inline ssize_t vhci_get_user(struct vhci_data *data,
 
 		kfree_skb(skb);
 
-		if (dev_type != HCI_BREDR && dev_type != HCI_AMP)
-			return -EINVAL;
-
-		ret = vhci_create_device(data, dev_type);
+		ret = vhci_create_device(data, opcode);
 		break;
 
 	default:
@@ -205,7 +236,7 @@ static inline ssize_t vhci_get_user(struct vhci_data *data,
 		return -EINVAL;
 	}
 
-	return (ret < 0) ? ret : count;
+	return (ret < 0) ? ret : len;
 }
 
 static inline ssize_t vhci_put_user(struct vhci_data *data,
@@ -272,12 +303,21 @@ static ssize_t vhci_read(struct file *file,
 	return ret;
 }
 
-static ssize_t vhci_write(struct file *file,
-			  const char __user *buf, size_t count, loff_t *pos)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
+static ssize_t vhci_write(struct kiocb *iocb, struct iov_iter *from)
+#else
+static ssize_t vhci_write(struct kiocb *iocb, const struct iovec *iov,
+			  unsigned long count, loff_t pos)
+#endif
 {
+	struct file *file = iocb->ki_filp;
 	struct vhci_data *data = file->private_data;
 
-	return vhci_get_user(data, buf, count);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
+	return vhci_get_user(data, from);
+#else
+	return vhci_get_user(data, iov, count);
+#endif
 }
 
 static unsigned int vhci_poll(struct file *file, poll_table *wait)
@@ -342,17 +382,21 @@ static int vhci_release(struct inode *inode, struct file *file)
 static const struct file_operations vhci_fops = {
 	.owner		= THIS_MODULE,
 	.read		= vhci_read,
-	.write		= vhci_write,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
+	.write_iter	= vhci_write,
+#else
+	.aio_write	= vhci_write,
+#endif
 	.poll		= vhci_poll,
 	.open		= vhci_open,
 	.release	= vhci_release,
 	.llseek		= no_llseek,
 };
 
-static struct miscdevice vhci_miscdev= {
+static struct miscdevice vhci_miscdev = {
 	.name	= "vhci",
 	.fops	= &vhci_fops,
-	.minor	= MISC_DYNAMIC_MINOR,
+	.minor	= VHCI_MINOR,
 };
 
 static int __init vhci_init(void)
@@ -378,3 +422,4 @@ MODULE_DESCRIPTION("Bluetooth virtual HCI driver ver " VERSION);
 MODULE_VERSION(VERSION);
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("devname:vhci");
+MODULE_ALIAS_MISCDEV(VHCI_MINOR);

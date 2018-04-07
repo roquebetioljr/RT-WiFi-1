@@ -195,12 +195,8 @@ static struct proto cmtp_proto = {
 	.obj_size	= sizeof(struct bt_sock)
 };
 
-#if defined(CPTCFG_BACKPORT_OPTION_BT_SOCK_CREATE_NEEDS_KERN)
 static int cmtp_sock_create(struct net *net, struct socket *sock, int protocol,
 			    int kern)
-#else
-static int cmtp_sock_create(struct net *net, struct socket *sock, int protocol)
-#endif
 {
 	struct sock *sk;
 
@@ -209,7 +205,7 @@ static int cmtp_sock_create(struct net *net, struct socket *sock, int protocol)
 	if (sock->type != SOCK_RAW)
 		return -ESOCKTNOSUPPORT;
 
-	sk = sk_alloc(net, PF_BLUETOOTH, GFP_ATOMIC, &cmtp_proto);
+	sk = sk_alloc(net, PF_BLUETOOTH, GFP_ATOMIC, &cmtp_proto, kern);
 	if (!sk)
 		return -ENOMEM;
 
