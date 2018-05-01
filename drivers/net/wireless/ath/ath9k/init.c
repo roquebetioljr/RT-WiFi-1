@@ -546,11 +546,14 @@ static void ath9k_init_rt_wifi(struct ath_softc *sc)
 	unsigned int fifo_size = sizeof(struct ath_buf*) * RT_WIFI_KFIFO_SIZE;
 	
 	sc->rt_wifi_enable = 0;
+	printk("RT-WIFI: RT-WiFi disabled. Init.");
 	ret = kfifo_alloc(&sc->rt_wifi_fifo, fifo_size, GFP_KERNEL);
 	if (ret != 0) {
 		printk(KERN_WARNING "%s: Error in allocating RT_WIFI FIFO %d.\n",
 			__FUNCTION__, ret);
 	}
+
+	sc->rt_wifi_lost_packet_buff = 0;
 	INIT_LIST_HEAD(&(sc->rt_wifi_q));
 	sc->rt_wifi_qcount = 0;
 	spin_lock_init(&sc->rt_wifi_q_lock);
@@ -565,6 +568,7 @@ static void ath9k_deinit_rt_wifi(struct ath_softc *sc)
 	struct ath_buf *new_buf;
 
 	sc->rt_wifi_enable = 0;
+	printk("RT-WIFI: Disabling RT-WiFi. Deinit.");
 
 	/* TODO: Not sure if the deinit is handled properly. */
 	while (true) {

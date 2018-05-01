@@ -33,6 +33,19 @@
 
 static struct ath_buf* ath_rt_wifi_get_buf_ap_tx(struct ath_softc *sc, u8 sta_id);
 static struct ath_buf* ath_rt_wifi_get_buf_ap_shared(struct ath_softc *sc);
+inline static unsigned int countSetBitsUtil(u16 x)
+{
+	unsigned int ret = 0;
+	int i=0;
+	while(i < 10){
+		if ( (x & 0x0001) == 1) {
+			ret+=1;
+		}
+		x = x >> 1;
+		i++;
+	}
+    return ret;
+}
 
 static u32 rt_wifi_get_slot_len(u8 time_slot)
 {
@@ -141,7 +154,7 @@ void ath_rt_wifi_sta_start_timer(struct ath_softc *sc)
 	}
 	
 	sc->rt_wifi_asn = sc->rt_wifi_asn + (RT_WIFI_BEACON_INTVAL / sc->rt_wifi_slot_len)  - 1;
-	RT_WIFI_DEBUG("%s cur_tsf: %llu, next_tsf: %llu, next_timer: %u, next_asn - 1: %d\n", __FUNCTION__, sc->rt_wifi_cur_tsf, next_tsf, next_timer, sc->rt_wifi_asn);
+	printk("%s cur_tsf: %llu, next_tsf: %llu, next_timer: %u, next_asn - 1: %d\n", __FUNCTION__, sc->rt_wifi_cur_tsf, next_tsf, next_timer, sc->rt_wifi_asn);
 }
 
 static struct ath_buf* ath_rt_wifi_get_buf_from_queue(struct ath_softc *sc, u8 sta_id)
@@ -319,8 +332,9 @@ void ath_rt_wifi_tasklet(struct ath_softc *sc)
 	if (sc->rt_wifi_enable == 0) {
 		if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
 			sc->rt_wifi_enable = 1;
+			printk("RT-WIFI: Enabling RT-WiFi. Tasklet.");
 		} else {
-			RT_WIFI_DEBUG("RT_WIFI: not enable\n");
+			printk("RT_WIFI: not enable\n");
 			return;
 		}
 	}
@@ -335,17 +349,17 @@ void ath_rt_wifi_tasklet(struct ath_softc *sc)
 	sched_offset = sc->rt_wifi_asn % sc->rt_wifi_superframe_size;
 	if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
 		if (sc->rt_wifi_superframe[sched_offset].type == RT_WIFI_RX) {
-			RT_WIFI_DEBUG("RT_WIFI_RX(%d)\n", sched_offset);
+			printk("RT_WIFI_RX(%d)\n", sched_offset);
 			new_buf = ath_rt_wifi_get_buf_ap_tx(sc,
 					sc->rt_wifi_superframe[sched_offset].sta_id);
 		} else if (sc->rt_wifi_superframe[sched_offset].type == RT_WIFI_SHARED) {
-			RT_WIFI_DEBUG("RT_WIFI_SHARED(%d)\n", sched_offset);
+			printk("RT_WIFI_SHARED(%d)\n", sched_offset);
 			new_buf = ath_rt_wifi_get_buf_ap_shared(sc);
 		}
 	} else if (sc->sc_ah->opmode == NL80211_IFTYPE_STATION) {
 		if (sc->rt_wifi_superframe[sched_offset].type == RT_WIFI_TX
 		&& sc->rt_wifi_superframe[sched_offset].sta_id == RT_WIFI_LOCAL_ID) {
-			RT_WIFI_DEBUG("RT_WIFI_TX(%d)\n", sched_offset);
+			printk("RT_WIFI_TX(%d)\n", sched_offset);
 			new_buf = ath_rt_wifi_get_buf_sta(sc);
 		}
 	}
@@ -429,9 +443,27 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 
 			ath_rt_wifi_sta_start_timer(sc);
 			sc->rt_wifi_enable = 1;
+			printk("RT-WIFI: Enabling RT-WiFi. Rx Beacon.");
 		} else {
 			RT_WIFI_DEBUG("local_tsf: %llu < rt_wifi_cur_tsf: %llu - TSF_SYNC_OFFSET\n",
 				local_tsf, sc->rt_wifi_cur_tsf);
 		}
 	}
+}
+
+void ath_rt_wifi_tx_analyse(struct ath_softc *sc)
+{
+	struct ath_hw *ah = sc->sc_ah;
+	struct ath_common *common = ath9k_hw_common(ah);
+	sc->rt_wifi_lost_packet_buff= (sc->rt_wifi_lost_packet_buff << 1) & 1;
+	u16 buff = sc->rt_wifi_lost_packet_buff && 0x03FF;
+	if( countSetBitsUtil(buff) > 1 )
+	{
+		sc->rt_wifi_enable = 1;
+		sc->rt_wifi_lost_packet_buff = 0;
+		printk("RT_WIFI: enabling RT-WiFi");
+		return;
+	}
+	printk("RT_WIFI: lost packet checked. OK");
+
 }

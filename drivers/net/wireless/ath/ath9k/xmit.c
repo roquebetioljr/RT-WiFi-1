@@ -17,7 +17,6 @@
 #include <linux/dma-mapping.h>
 #include "ath9k.h"
 #include "ar9003_mac.h"
-#include "rt-wifi.h"
 
 #define BITS_PER_BYTE           8
 #define OFDM_PLCP_BITS          22
@@ -2127,7 +2126,7 @@ static void ath_tx_txqaddbuf(struct ath_softc *sc, struct ath_txq *txq,
 						&bf_itr,
 						sizeof(struct ath_buf*));
 			} else {
-				RT_WIFI_DEBUG(
+				printk(
 					"KFIFO is out of space!! If this"
 				        "happens, investigate RT_WIFI_KFIFO_SIZE\n");
 			}
@@ -2149,7 +2148,7 @@ static void ath_tx_send_normal(struct ath_softc *sc, struct ath_txq *txq,
 	struct ieee80211_hdr *hdr;
 
 	hdr = (struct ieee80211_hdr*)skb->data;
-	RT_WIFI_DEBUG( "New destination address: %X:%X:%X:%X:%X:%X\n"
+	printk( "New destination address: %X:%X:%X:%X:%X:%X\n"
 				, hdr->addr1[0]
 				, hdr->addr1[1]
 				, hdr->addr1[2]
@@ -2577,10 +2576,22 @@ static void ath_tx_complete(struct ath_softc *sc, struct sk_buff *skb,
 
 	if (!(tx_flags & ATH_TX_ERROR)) {
 		if (tx_info->flags & IEEE80211_TX_CTL_NO_ACK)
+		{
 			tx_info->flags |= IEEE80211_TX_STAT_NOACK_TRANSMITTED;
+#ifdef CPTCFG_RT_WIFI
+			ath_rt_wifi_tx_analyse(sc);
+#endif
+		}
 		else
+		{
 			tx_info->flags |= IEEE80211_TX_STAT_ACK;
+		}
 	}
+#ifdef CPTCFG_RT_WIFI
+	else {
+		ath_rt_wifi_tx_analyse(sc);
+	}
+#endif
 
 	padpos = ieee80211_hdrlen(hdr->frame_control);
 	padsize = padpos & 3;

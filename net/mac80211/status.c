@@ -651,6 +651,7 @@ void ieee80211_tx_status_noskb(struct ieee80211_hw *hw,
 			if (test_sta_flag(sta, WLAN_STA_TDLS_PEER_AUTH))
 				sta->status_stats.last_tdls_pkt_time = jiffies;
 		} else {
+			//TODO: lost packet counter
 			ieee80211_lost_packet(sta, info);
 		}
 
@@ -867,6 +868,7 @@ void ieee80211_tx_status(struct ieee80211_hw *hw, struct sk_buff *skb)
 					sta->status_stats.last_tdls_pkt_time =
 						jiffies;
 			} else {
+				// TODO: lost packet counter
 				ieee80211_lost_packet(sta, info);
 			}
 		}

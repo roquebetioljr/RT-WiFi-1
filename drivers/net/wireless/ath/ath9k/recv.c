@@ -1150,7 +1150,7 @@ int ath_rx_tasklet(struct ath_softc *sc, int flush, bool hp)
 					s64 diff = (cur_virt_tsf - local_tsf);
 					s64 k_ap_restart_diff_offset = 200000;
 					if (diff > k_ap_restart_diff_offset) {
-						RT_WIFI_DEBUG("Restart station timer, L: %llu, V: %llu\n", local_tsf, cur_virt_tsf);
+						printk("Restart station timer, L: %llu, V: %llu\n", local_tsf, cur_virt_tsf);
 						ath9k_gen_timer_stop(sc->sc_ah, sc->rt_wifi_timer);
 						ath_rt_wifi_rx_beacon(sc, skb);
 					}

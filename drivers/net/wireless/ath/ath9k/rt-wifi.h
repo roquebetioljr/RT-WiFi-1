@@ -43,6 +43,7 @@
 #define RT_WIFI_BEACON_DELAY_OFFSET 60    /* in terms of micro-sec, this value is highly dependent on beacon data rate, 60us for 24Mbps */
 
 #define RT_WIFI_KFIFO_SIZE 2048
+#define RT_WIFI_KFIFO_ANALISYS_SIZE 128
 // Make sure this # is the same as ath_tx_buf_size!!
 // We do not take care of FIFO overflow.
 
@@ -90,12 +91,17 @@ struct rt_wifi_sched{
 	u8 sta_id;
 };
 
+struct rt_wifi_analisys{
+	bool transmmit_failed;
+};
+
 /* rt-wifi function prototype*/
 void ath_rt_wifi_tasklet(struct ath_softc *sc);
 void ath_rt_wifi_ap_start_timer(struct ath_softc *sc, u32 bcon_intval, u32 nexttbtt);
 void ath_rt_wifi_sta_start_timer(struct ath_softc *sc);
 void ath_rt_wifi_tx(struct ath_softc *sc, struct ath_buf *new_buf);
 void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb);
+void ath_rt_wifi_tx_analyse(struct ath_softc *sc);
 struct ath_buf* ath_rt_wifi_get_buf_sta(struct ath_softc *sc);
 bool rt_wifi_authorized_sta(u8 *addr);
 inline bool rt_wifi_dst_sta(u8 *addr, u8 sta_id);

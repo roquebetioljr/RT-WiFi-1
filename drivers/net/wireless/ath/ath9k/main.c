@@ -835,7 +835,7 @@ static void ath9k_tx(struct ieee80211_hw *hw,
 	/* rt-wifi: Disable probe response. */
 	if (ieee80211_is_probe_resp(hdr->frame_control)) {
 		if(rt_wifi_authorized_sta(hdr->addr1) == false) {
-			RT_WIFI_DEBUG("Unauthorized destination address: %X:%X:%X:%X:%X:%X\n"
+			printk("Unauthorized destination address: %X:%X:%X:%X:%X:%X\n"
 				, hdr->addr1[0]
 				, hdr->addr1[1]
 				, hdr->addr1[2]

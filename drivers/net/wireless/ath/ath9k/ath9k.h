@@ -1085,6 +1085,7 @@ struct ath_softc {
 	u64 rt_wifi_virt_start_tsf;
 	u32 rt_wifi_beacon_bfaddr;
 	u32 rt_wifi_beacon_bc;
+	u16 rt_wifi_lost_packet_buff;
 #endif
 };
 

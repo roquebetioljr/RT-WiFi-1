@@ -504,11 +504,12 @@ static void ath9k_beacon_config_ap(struct ath_softc *sc,
 
 #ifdef CPTCFG_RT_WIFI
 	if(sc->rt_wifi_timer == NULL) {
-		RT_WIFI_DEBUG("No timer is allocated.\n");
+		printk("No timer is allocated.\n");
 	} else {
-		RT_WIFI_DEBUG("AP timer starts.\n");
+		printk("AP timer starts.\n");
 		ath_rt_wifi_ap_start_timer(sc, intval, nexttbtt);
 		sc->rt_wifi_enable = 1;
+		printk("RT-WIFI: Enabling RT-WiFi. Config AP.");
 	}
 #endif
 }
