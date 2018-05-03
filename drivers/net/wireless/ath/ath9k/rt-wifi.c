@@ -450,11 +450,11 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 	}
 }
 
-void ath_rt_wifi_tx_analyse(struct ath_softc *sc)
+void ath_rt_wifi_tx_analyse(struct ath_softc *sc, u16 is_lost)
 {
 	struct ath_hw *ah = sc->sc_ah;
 	struct ath_common *common = ath9k_hw_common(ah);
-	sc->rt_wifi_lost_packet_buff= (sc->rt_wifi_lost_packet_buff << 1) & 1;
+	sc->rt_wifi_lost_packet_buff= (sc->rt_wifi_lost_packet_buff << 1) | (0x01 & is_lost);
 	u16 buff = sc->rt_wifi_lost_packet_buff && 0x03FF;
 	if( countSetBitsUtil(buff) > 1 )
 	{

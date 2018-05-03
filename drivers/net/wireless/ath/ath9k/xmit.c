@@ -2437,21 +2437,14 @@ static void ath_tx_complete(struct ath_softc *sc, struct sk_buff *skb,
 		set_bit(PAPRD_PACKET_SENT, &sc->sc_ah->caldata->cal_flags);
 
 	if (!(tx_flags & ATH_TX_ERROR)) {
-		if (tx_info->flags & IEEE80211_TX_CTL_NO_ACK)
-		{
-			tx_info->flags |= IEEE80211_TX_STAT_NOACK_TRANSMITTED;
+		tx_info->flags |= IEEE80211_TX_STAT_ACK;
 #ifdef CPTCFG_RT_WIFI
-			ath_rt_wifi_tx_analyse(sc);
+		ath_rt_wifi_tx_analyse(sc, 0);
 #endif
-		}
-		else
-		{
-			tx_info->flags |= IEEE80211_TX_STAT_ACK;
-		}
 	}
 #ifdef CPTCFG_RT_WIFI
 	else {
-		ath_rt_wifi_tx_analyse(sc);
+		ath_rt_wifi_tx_analyse(sc, 1);
 	}
 #endif
 
