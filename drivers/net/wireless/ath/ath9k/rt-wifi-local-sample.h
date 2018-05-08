@@ -38,7 +38,7 @@
 
 /* Transmission configuration */
 /* co-existence */
-#define RT_WIFI_ENABLE_COEX	0
+#define RT_WIFI_ENABLE_COEX	1
 /* # of in-slot transmission count */
 #define RT_WIFI_NUM_OF_TRIES	1
 /* Whether the sender will wait for ACK or not */
