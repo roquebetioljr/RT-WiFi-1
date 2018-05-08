@@ -143,25 +143,35 @@ static struct ath_buf *ath9k_beacon_generate(struct ieee80211_hw *hw,
 
 #ifdef CPTCFG_RT_WIFI
 	/* Append TDMA information to a beacon frame by vendor specific info. */
-	if (sc->rt_wifi_enable == 1) {
+	//if (sc->rt_wifi_enable == 1)
+	{
 		sc->rt_wifi_bc_tsf += RT_WIFI_BEACON_INTVAL;
 		sc->rt_wifi_bc_asn +=
 			RT_WIFI_BEACON_INTVAL / sc->rt_wifi_slot_len;
+		int i;
 
 		tmp = skb_put(skb, RT_WIFI_BEACON_VEN_EXT_SIZE);
 		tmp[0] = RT_WIFI_BEACON_TAG;    /* Tag number for Vendor Specific Info */
-		tmp[1] = 0x0F;	  /* Lengh of tag (exclude these two bytes) */
+		tmp[1] = sizeof(int) + sizeof(int) + sizeof(u64) + 1 + sizeof(u16);	  /* Lengh of tag (exclude these two bytes) */
 
+		i = 2;
+		src = (unsigned char *)(&sc->rt_wifi_enable);
+		memcpy((tmp+i), src, sizeof(int));
+
+		i += sizeof(int);
 		src = (unsigned char *)(&sc->rt_wifi_bc_asn);
-		memcpy((tmp+2), src, sizeof(int));
+		memcpy((tmp+i), src, sizeof(int));
 
+		i += sizeof(int);
 		src = (unsigned char *)(&sc->rt_wifi_bc_tsf);
-		memcpy((tmp+6), src, sizeof(u64));
+		memcpy((tmp+i), src, sizeof(u64));
 
-		*(tmp+14) = RT_WIFI_TIME_SLOT_LEN;
+		i += sizeof(u64);
+		*(tmp+i) = RT_WIFI_TIME_SLOT_LEN;
 
+		i += 1;
 		src = (unsigned char *)(&sc->rt_wifi_superframe_size);
-		memcpy((tmp+15), src, sizeof(u16));
+		memcpy((tmp+i), src, sizeof(u16));
 	}
 #endif
 

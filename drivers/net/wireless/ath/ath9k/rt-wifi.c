@@ -331,6 +331,7 @@ void ath_rt_wifi_tasklet(struct ath_softc *sc)
 
 	if (sc->rt_wifi_enable == 0) {
 		if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
+			//TODO: Turn off RT-WiFI
 			sc->rt_wifi_enable = 1;
 		} else {
 			RT_WIFI_DEBUG("RT_WIFI: not enable\n");
@@ -428,21 +429,32 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 
 		if(local_tsf >= (sc->rt_wifi_cur_tsf - RT_WIFI_TSF_SYNC_OFFSET)) {
 			// Process beacon information
-			memcpy((unsigned char*)(&sc->rt_wifi_asn), (data+2), sizeof(int));
+			int i=2;
+			memcpy((unsigned char*)(&sc->rt_wifi_enable), (data+i), sizeof(int));
+			RT_WIFI_DEBUG("beacon rt_wifi_enabled: %u\n", sc->rt_wifi_enable);
+
+			i += sizeof(int);
+			memcpy((unsigned char*)(&sc->rt_wifi_asn), (data+i), sizeof(int));
 			RT_WIFI_DEBUG("beacon asn: %u\n", sc->rt_wifi_asn);
 
-			memcpy(&slot_size, (data+14), sizeof(u8));
+			i += sizeof(int) + sizeof(u64);
+
+			memcpy(&slot_size, (data+i), sizeof(u8));
 			sc->rt_wifi_slot_len = rt_wifi_get_slot_len(slot_size);
 			RT_WIFI_DEBUG("slot len: %u\n", sc->rt_wifi_slot_len);
 
-			memcpy((unsigned char*)(&sc->rt_wifi_superframe_size), (data+15), sizeof(u16));
+			i += sizeof(u8);
+			memcpy((unsigned char*)(&sc->rt_wifi_superframe_size), (data+i), sizeof(u16));
 			RT_WIFI_DEBUG("sf size: %u\n", sc->rt_wifi_superframe_size);
 
-			rt_wifi_config_superframe(sc);
-
-			ath_rt_wifi_sta_start_timer(sc);
-			sc->rt_wifi_enable = 1;
-			RT_WIFI_DEBUG("RT-WIFI: Enabling RT-WiFi. Rx Beacon.");
+			if(sc->rt_wifi_enable)
+			{
+				rt_wifi_config_superframe(sc);
+				ath_rt_wifi_sta_start_timer(sc);
+				RT_WIFI_DEBUG("RT-WIFI: Enabling RT-WiFi. Rx Beacon.");
+			} else {
+				RT_WIFI_DEBUG("RT-WIFI: RT-WiFi disabled.");
+			}
 		} else {
 			RT_WIFI_DEBUG("local_tsf: %llu < rt_wifi_cur_tsf: %llu - TSF_SYNC_OFFSET\n",
 				local_tsf, sc->rt_wifi_cur_tsf);
@@ -462,7 +474,8 @@ void ath_rt_wifi_tx_analyse(struct ath_softc *sc, u16 is_lost)
 		sc->rt_wifi_lost_packet_buff = 0;
 		RT_WIFI_DEBUG("RT_WIFI: enabling RT-WiFi");
 		return;
+	} else {
+		sc->rt_wifi_enable = 0;
+		RT_WIFI_DEBUG("RT_WIFI: lost packet checked. OK");
 	}
-	RT_WIFI_DEBUG("RT_WIFI: lost packet checked. OK");
-
 }
