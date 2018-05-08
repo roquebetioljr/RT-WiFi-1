@@ -330,13 +330,12 @@ void ath_rt_wifi_tasklet(struct ath_softc *sc)
 	u64 cur_hw_tsf;
 
 	if (sc->rt_wifi_enable == 0) {
-		if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
-			//TODO: Turn off RT-WiFI
-			sc->rt_wifi_enable = 1;
-		} else {
+		//if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
+			//sc->rt_wifi_enable = 1;
+		//} else {
 			RT_WIFI_DEBUG("RT_WIFI: not enable\n");
 			return;
-		}
+		//}
 	}
 
 	/* House keeping */
