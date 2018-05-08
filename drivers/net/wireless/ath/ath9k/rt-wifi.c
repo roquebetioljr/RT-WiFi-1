@@ -333,10 +333,11 @@ void ath_rt_wifi_tasklet(struct ath_softc *sc)
 		//if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
 			//sc->rt_wifi_enable = 1;
 		//} else {
-			RT_WIFI_DEBUG("RT_WIFI: not enable\n");
+			//RT_WIFI_DEBUG("RT_WIFI: not enable\n");
 			return;
 		//}
 	}
+	RT_WIFI_DEBUG("RT_WIFI: enabled\n");
 
 	/* House keeping */
 	sc->rt_wifi_asn++;	
