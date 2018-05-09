@@ -33,9 +33,9 @@
 
 static struct ath_buf* ath_rt_wifi_get_buf_ap_tx(struct ath_softc *sc, u8 sta_id);
 static struct ath_buf* ath_rt_wifi_get_buf_ap_shared(struct ath_softc *sc);
-inline static unsigned int countSetBitsUtil(u16 x)
+inline static int countSetBitsUtil(u16 x)
 {
-	unsigned int ret = 0;
+	int ret = 0;
 	int i=0;
 	while(i < 10){
 		if ( (x & 0x0001) == 1) {
@@ -468,14 +468,16 @@ void ath_rt_wifi_tx_analyse(struct ath_softc *sc, u16 is_lost)
 	struct ath_common *common = ath9k_hw_common(ah);
 	sc->rt_wifi_lost_packet_buff= (sc->rt_wifi_lost_packet_buff << 1) | (0x01 & is_lost);
 	u16 buff = sc->rt_wifi_lost_packet_buff && 0x03FF;
-	if( countSetBitsUtil(buff) > 1 )
+	int lost_packts = countSetBitsUtil(buff);
+	RT_WIFI_DEBUG("RT_WIFI: %d packet lost of last 10.\n", lost_packts);
+	if( lost_packts > 1 )
 	{
 		sc->rt_wifi_enable = 1;
 		sc->rt_wifi_lost_packet_buff = 0;
-		RT_WIFI_DEBUG("RT_WIFI: enabling RT-WiFi");
+		RT_WIFI_DEBUG("RT_WIFI: enabling RT-WiFi\n");
 		return;
 	} else {
 		sc->rt_wifi_enable = 0;
-		RT_WIFI_DEBUG("RT_WIFI: lost packet checked. OK");
+		RT_WIFI_DEBUG("RT_WIFI: lost packet checked. OK\n");
 	}
 }
