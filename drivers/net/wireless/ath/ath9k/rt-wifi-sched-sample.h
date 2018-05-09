@@ -51,8 +51,8 @@ static struct rt_wifi_sched RT_WIFI_PRE_CONFIG_SCHED[] = {
 	{ .type = RT_WIFI_TX, 1,  .sta_id = 0x00 },
 	{ .type = RT_WIFI_RX, 2,  .sta_id = 0x01 },
 	{ .type = RT_WIFI_TX, 3,  .sta_id = 0x01 },
+	{ .type = RT_WIFI_BEACON, 4},
 	{ .type = RT_WIFI_BEACON, 5},
-	{ .type = RT_WIFI_BEACON, 6},
 };
 
 #endif /* RT_WIFI_SCHED_H */
