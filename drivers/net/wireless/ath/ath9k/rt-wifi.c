@@ -474,6 +474,6 @@ void ath_rt_wifi_tx_analyse(struct ath_softc *sc, u16 is_lost)
 		}
 	}
 	sc->rt_wifi_lost_packet_buff = (sc->rt_wifi_lost_packet_buff << 1) | is_lost;
-	sc->rt_wifi_lost_packet_buff = sc->rt_wifi_lost_packet_buff && 0x03FF;
+	sc->rt_wifi_lost_packet_buff = sc->rt_wifi_lost_packet_buff & 0x03FF;
 	RT_WIFI_DEBUG("RT_WIFI: packet loss buff 0x%04x.\n", sc->rt_wifi_lost_packet_buff);
 }
