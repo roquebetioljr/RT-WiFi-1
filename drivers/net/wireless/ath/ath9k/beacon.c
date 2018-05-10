@@ -515,7 +515,7 @@ static void ath9k_beacon_config_ap(struct ath_softc *sc,
 	} else {
 		RT_WIFI_DEBUG("AP timer starts.\n");
 		ath_rt_wifi_ap_start_timer(sc, intval, nexttbtt);
-		sc->rt_wifi_enable = 1;
+		sc->rt_wifi_enable = 0;
 		RT_WIFI_DEBUG("RT-WIFI: Config AP.");
 	}
 #endif

@@ -454,14 +454,23 @@ void ath_rt_wifi_tx_analyse(struct ath_softc *sc, u16 is_lost)
 	struct ath_hw *ah = sc->sc_ah;
 	if ((ah->opmode == NL80211_IFTYPE_AP)) {
 		struct ath_common *common = ath9k_hw_common(ah);
-		if( is_lost && sc->rt_wifi_lost_packet_buff > 0 )
+		if( sc->rt_wifi_enable)
 		{
-			sc->rt_wifi_enable = 1;
-			RT_WIFI_DEBUG("RT_WIFI: enabling RT-WiFi\n");
-			return;
+			if( is_lost || sc->rt_wifi_lost_packet_buff > 0 )
+			{
+				RT_WIFI_DEBUG("RT_WIFI: lost packet checked. RT-WiFi ON.\n");
+			} else {
+				sc->rt_wifi_enable = 0;;
+				RT_WIFI_DEBUG("RT_WIFI: disabling RT-WiFi\n");
+			}
 		} else {
-			sc->rt_wifi_enable = 0;
-			RT_WIFI_DEBUG("RT_WIFI: lost packet checked. OK\n");
+			if( is_lost && sc->rt_wifi_lost_packet_buff > 0 )
+			{
+				sc->rt_wifi_enable = 1;
+				RT_WIFI_DEBUG("RT_WIFI: enabling RT-WiFi\n");
+			} else {
+				RT_WIFI_DEBUG("RT_WIFI: lost packet checked. RT-WiFi OFF.\n");
+			}
 		}
 		sc->rt_wifi_lost_packet_buff = (sc->rt_wifi_lost_packet_buff << 1) | is_lost;
 		sc->rt_wifi_lost_packet_buff = sc->rt_wifi_lost_packet_buff && 0x03FF;
