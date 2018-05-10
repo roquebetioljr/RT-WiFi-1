@@ -324,7 +324,7 @@ void ath_rt_wifi_tasklet(struct ath_softc *sc)
 			return;
 		//}
 	}
-	RT_WIFI_DEBUG("RT_WIFI: enabled\n");
+	//RT_WIFI_DEBUG("RT_WIFI: enabled\n");
 
 	/* House keeping */
 	sc->rt_wifi_asn++;	

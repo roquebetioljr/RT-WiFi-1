@@ -1536,7 +1536,7 @@ int ath_rx_tasklet(struct ath_softc *sc, int flush, bool hp)
 				if (sc->rt_wifi_enable == 0) {
 					ath_rt_wifi_rx_beacon(sc, skb);
 				} else {
-					RT_WIFI_DEBUG("RT-WiFi enabled\n");
+					//RT_WIFI_DEBUG("RT-WiFi enabled\n");
 					u64 local_tsf = ath9k_hw_gettsf64(ah);
 					u64 cur_virt_tsf = sc->rt_wifi_virt_start_tsf + (sc->rt_wifi_asn * sc->rt_wifi_slot_len);
 					s64 diff = (cur_virt_tsf - local_tsf);
