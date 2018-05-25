@@ -410,7 +410,7 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 			return;
 		}
 
-		memcpy((unsigned char*)(&sc->rt_wifi_cur_tsf), (data+6), sizeof(u64));
+		memcpy((unsigned char*)(&sc->rt_wifi_cur_tsf), (data+2+sizeof(int)), sizeof(u64));
 		RT_WIFI_DEBUG("beacon current tsf: %llu\n", sc->rt_wifi_cur_tsf);
 		local_tsf = ath9k_hw_gettsf64(ah); 
 
@@ -447,9 +447,9 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 				local_tsf, sc->rt_wifi_cur_tsf);
 			if(sc->rt_wifi_enable)
 			{
-				RT_WIFI_DEBUG("RT-WIFI: RT-WiFi enabled.");
+				RT_WIFI_DEBUG("RT-WIFI: TDMA enabled.");
 			} else {
-				RT_WIFI_DEBUG("RT-WIFI: RT-WiFi disabled.");
+				RT_WIFI_DEBUG("RT-WIFI: TDMA disabled.");
 			}
 		}
 	}
