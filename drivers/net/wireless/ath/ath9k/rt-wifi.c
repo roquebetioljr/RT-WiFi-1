@@ -421,9 +421,9 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 		RT_WIFI_DEBUG("beacon current tsf: %llu\n", sc->rt_wifi_cur_tsf);
 		local_tsf = ath9k_hw_gettsf64(ah); 
 
-		if(local_tsf >= (sc->rt_wifi_cur_tsf - RT_WIFI_TSF_SYNC_OFFSET)) {
+		//if(local_tsf >= (sc->rt_wifi_cur_tsf - RT_WIFI_TSF_SYNC_OFFSET)) {
+		if(sc->rt_wifi_enable){
 			// Process beacon information
-
 
 			i = 2 + sizeof(int) /*headers + rt_wifi_enabled*/;
 			memcpy((unsigned char*)(&sc->rt_wifi_asn), (data+i), sizeof(int));
@@ -439,17 +439,14 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 			memcpy((unsigned char*)(&sc->rt_wifi_superframe_size), (data+i), sizeof(u16));
 			RT_WIFI_DEBUG("sf size: %u\n", sc->rt_wifi_superframe_size);
 
-			if(sc->rt_wifi_enable)
-			{
-				rt_wifi_config_superframe(sc);
-				ath_rt_wifi_sta_start_timer(sc);
-				RT_WIFI_DEBUG("RT-WIFI: Enabling RT-WiFi. Rx Beacon.");
-			} else {
-				RT_WIFI_DEBUG("RT-WIFI: RT-WiFi disabled.");
-			}
+			rt_wifi_config_superframe(sc);
+			ath_rt_wifi_sta_start_timer(sc);
+			RT_WIFI_DEBUG("Enabling TDMA. Rx Beacon.");
+
 		} else {
-			RT_WIFI_DEBUG("local_tsf: %llu < rt_wifi_cur_tsf: %llu - TSF_SYNC_OFFSET\n",
-				local_tsf, sc->rt_wifi_cur_tsf);
+			RT_WIFI_DEBUG("TDMA disabled.");
+			//RT_WIFI_DEBUG("local_tsf: %llu < rt_wifi_cur_tsf: %llu - TSF_SYNC_OFFSET\n",
+			//	local_tsf, sc->rt_wifi_cur_tsf);
 		}
 	}
 }
