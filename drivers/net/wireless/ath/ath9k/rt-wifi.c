@@ -411,40 +411,54 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 			return;
 		}
 
+		u8 slot_size;
+		u16 sf_size;
+		int rt_wifi_enabled, asn;
+		u64 cur_tsf;
+
 		int i=2; //headers
-		memcpy((unsigned char*)(&sc->rt_wifi_enable), (data+i), sizeof(int));
+		memcpy((unsigned char*)(&rt_wifi_enabled), (data+i), sizeof(int));
 		RT_WIFI_DEBUG("beacon rt_wifi_enabled: %u\n", sc->rt_wifi_enable);
+
 		i+= sizeof(int); //rt_wifi_enabled
+		memcpy((unsigned char*)(&asn), (data+i), sizeof(int));
+		RT_WIFI_DEBUG("beacon asn: %u\n", asn);
+
 		i+= sizeof(int); //asn
 
-		memcpy((unsigned char*)(&sc->rt_wifi_cur_tsf), (data+i), sizeof(u64));
-		RT_WIFI_DEBUG("beacon current tsf: %llu\n", sc->rt_wifi_cur_tsf);
-		local_tsf = ath9k_hw_gettsf64(ah); 
+		memcpy((unsigned char*)(&cur_tsf), (data+i), sizeof(u64));
+		RT_WIFI_DEBUG("beacon current tsf: %llu\n", cur_tsf);
+		local_tsf = ath9k_hw_gettsf64(ah);
+		RT_WIFI_DEBUG("local tsf: %llu\n", local_tsf)
+
+		sc->rt_wifi_cur_tsf = cur_tsf;
+
+		i += sizeof(u64) /*tsf*/;
+		memcpy(&slot_size, (data+i), sizeof(u8));
+		sc->rt_wifi_slot_len = rt_wifi_get_slot_len(slot_size);
+		RT_WIFI_DEBUG("beachon slot len: %u\n", slot_size);
+
+		i += sizeof(u8);
+		memcpy((unsigned char*)(&sf_size), (data+i), sizeof(u16));
+		RT_WIFI_DEBUG("beacon sf size: %u\n", sf_size);
 
 		//if(local_tsf >= (sc->rt_wifi_cur_tsf - RT_WIFI_TSF_SYNC_OFFSET)) {
-		if(sc->rt_wifi_enable){
+		if( (rt_wifi_enabled && !sc->rt_wifi_enable) ||
+				(sc->rt_wifi_enable && local_tsf >= cur_tsf)
+				){
 			// Process beacon information
-
-			i = 2 + sizeof(int) /*headers + rt_wifi_enabled*/;
-			memcpy((unsigned char*)(&sc->rt_wifi_asn), (data+i), sizeof(int));
-			RT_WIFI_DEBUG("beacon asn: %u\n", sc->rt_wifi_asn);
-
-			i += sizeof(int) /*asn*/ + sizeof(u64) /*tsf*/;
-
-			memcpy(&slot_size, (data+i), sizeof(u8));
-			sc->rt_wifi_slot_len = rt_wifi_get_slot_len(slot_size);
-			RT_WIFI_DEBUG("slot len: %u\n", sc->rt_wifi_slot_len);
-
-			i += sizeof(u8);
-			memcpy((unsigned char*)(&sc->rt_wifi_superframe_size), (data+i), sizeof(u16));
-			RT_WIFI_DEBUG("sf size: %u\n", sc->rt_wifi_superframe_size);
+			sc->rt_wifi_enable = rt_wifi_enabled;
+			sc->rt_wifi_asn = asn;
+			sc->rt_wifi_slot_len = slot_size;
+			sc->rt_wifi_superframe_size = sf_size;
 
 			rt_wifi_config_superframe(sc);
 			ath_rt_wifi_sta_start_timer(sc);
 			RT_WIFI_DEBUG("Enabling TDMA. Rx Beacon.");
 
 		} else {
-			RT_WIFI_DEBUG("TDMA disabled.");
+			sc->rt_wifi_enable = rt_wifi_enabled;
+			RT_WIFI_DEBUG("TDMA disabled or Local tsf is lower than cur_tsf.");
 			//RT_WIFI_DEBUG("local_tsf: %llu < rt_wifi_cur_tsf: %llu - TSF_SYNC_OFFSET\n",
 			//	local_tsf, sc->rt_wifi_cur_tsf);
 		}
