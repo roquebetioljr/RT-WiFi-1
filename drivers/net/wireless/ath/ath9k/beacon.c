@@ -167,7 +167,7 @@ static struct ath_buf *ath9k_beacon_generate(struct ieee80211_hw *hw,
 		i += sizeof(int);
 		src = (unsigned char *)(&sc->rt_wifi_bc_tsf);
 		memcpy((tmp+i), src, sizeof(u64));
-		RT_WIFI_DEBUG("Beacon tsf: %u\n", sc->rt_wifi_bc_tsf);
+		RT_WIFI_DEBUG("Beacon tsf: %llu\n", sc->rt_wifi_bc_tsf);
 
 		i += sizeof(u64);
 		*(tmp+i) = RT_WIFI_TIME_SLOT_LEN;
