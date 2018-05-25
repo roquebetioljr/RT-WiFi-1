@@ -428,7 +428,7 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 		memcpy((unsigned char*)(&cur_tsf), (data+i), sizeof(u64));
 		RT_WIFI_DEBUG("beacon current tsf: %llu\n", cur_tsf);
 		local_tsf = ath9k_hw_gettsf64(ah);
-		RT_WIFI_DEBUG("local tsf: %llu\n", local_tsf)
+		RT_WIFI_DEBUG("local tsf: %llu\n", local_tsf);
 
 		sc->rt_wifi_cur_tsf = cur_tsf;
 
