@@ -411,7 +411,6 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 			return;
 		}
 
-		u8 slot_size;
 		u16 sf_size;
 		int rt_wifi_enabled, asn;
 		u64 cur_tsf;
@@ -435,7 +434,6 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 
 		i += sizeof(u64) /*tsf*/;
 		memcpy(&slot_size, (data+i), sizeof(u8));
-		sc->rt_wifi_slot_len = rt_wifi_get_slot_len(slot_size);
 		RT_WIFI_DEBUG("beachon slot len: %u\n", slot_size);
 
 		i += sizeof(u8);
@@ -449,7 +447,7 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 			// Process beacon information
 			sc->rt_wifi_enable = rt_wifi_enabled;
 			sc->rt_wifi_asn = asn;
-			sc->rt_wifi_slot_len = slot_size;
+			sc->rt_wifi_slot_len = rt_wifi_get_slot_len(slot_size);
 			sc->rt_wifi_superframe_size = sf_size;
 
 			rt_wifi_config_superframe(sc);
