@@ -445,6 +445,12 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 		} else {
 			RT_WIFI_DEBUG("local_tsf: %llu < rt_wifi_cur_tsf: %llu - TSF_SYNC_OFFSET\n",
 				local_tsf, sc->rt_wifi_cur_tsf);
+			if(sc->rt_wifi_enable)
+			{
+				RT_WIFI_DEBUG("RT-WIFI: RT-WiFi enabled.");
+			} else {
+				RT_WIFI_DEBUG("RT-WIFI: RT-WiFi disabled.");
+			}
 		}
 	}
 }
