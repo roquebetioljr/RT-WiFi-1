@@ -35,7 +35,7 @@
 /* rt-wifi constant */
 #define RT_WIFI_TIMER_OFFSET  50	/* compensate the isr invoking time */
 #define RT_WIFI_TSF_SYNC_OFFSET 1000 /* max sync error in micro-sec */
-#define RT_WIFI_BEACON_VEN_EXT_SIZE 17  // Size of vendor extension in beacon frame
+#define RT_WIFI_BEACON_VEN_EXT_SIZE (2+sizeof(int)+sizeof(int)+sizeof(u64)+sizeof(u8)+sizeof(u16))//17  // Size of vendor extension in beacon frame
 #define BEACON_FCS_SIZE 4    		// Size of frame check sequence in byte
 #define RT_WIFI_BEACON_TAG    0xFE
 #define RT_WIFI_BEACON_INTVAL 102400         /* in terms of microsec, default beacon time interval 100 time units

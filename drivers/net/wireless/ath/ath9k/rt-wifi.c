@@ -436,7 +436,7 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 		memcpy(&slot_size, (data+i), sizeof(u8));
 		RT_WIFI_DEBUG("beachon slot len: %u\n", slot_size);
 
-		i += sizeof(u8);
+		i += sizeof(u8); //slot len
 		memcpy((unsigned char*)(&sf_size), (data+i), sizeof(u16));
 		RT_WIFI_DEBUG("beacon sf size: %u\n", sf_size);
 

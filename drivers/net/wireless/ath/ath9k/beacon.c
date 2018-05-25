@@ -154,25 +154,25 @@ static struct ath_buf *ath9k_beacon_generate(struct ieee80211_hw *hw,
 		tmp[0] = RT_WIFI_BEACON_TAG;    /* Tag number for Vendor Specific Info */
 		tmp[1] = sizeof(int) + sizeof(int) + sizeof(u64) + 1 + sizeof(u16);	  /* Lengh of tag (exclude these two bytes) */
 
-		i = 2;
+		i = 2; //headers
 		src = (unsigned char *)(&sc->rt_wifi_enable);
 		memcpy((tmp+i), src, sizeof(int));
 		RT_WIFI_DEBUG("Beacon rt_wifi_enabled: %u\n", sc->rt_wifi_enable);
 
-		i += sizeof(int);
+		i += sizeof(int); //rt_wifi_enabled
 		src = (unsigned char *)(&sc->rt_wifi_bc_asn);
 		memcpy((tmp+i), src, sizeof(int));
 		RT_WIFI_DEBUG("Beacon asn: %u\n", sc->rt_wifi_bc_asn);
 
-		i += sizeof(int);
+		i += sizeof(int); //asn
 		src = (unsigned char *)(&sc->rt_wifi_bc_tsf);
 		memcpy((tmp+i), src, sizeof(u64));
 		RT_WIFI_DEBUG("Beacon tsf: %llu\n", sc->rt_wifi_bc_tsf);
 
-		i += sizeof(u64);
+		i += sizeof(u64); //tsf
 		*(tmp+i) = RT_WIFI_TIME_SLOT_LEN;
 
-		i += 1;
+		i += sizeof(u8); //slot len
 		src = (unsigned char *)(&sc->rt_wifi_superframe_size);
 		memcpy((tmp+i), src, sizeof(u16));
 		RT_WIFI_DEBUG("Beacon sf size: %u\n", sc->rt_wifi_superframe_size);
