@@ -412,6 +412,8 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 		}
 
 		int i=2; //headers
+		memcpy((unsigned char*)(&sc->rt_wifi_enable), (data+i), sizeof(int));
+		RT_WIFI_DEBUG("beacon rt_wifi_enabled: %u\n", sc->rt_wifi_enable);
 		i+= sizeof(int); //rt_wifi_enabled
 		i+= sizeof(int); //asn
 
@@ -421,11 +423,9 @@ void ath_rt_wifi_rx_beacon(struct ath_softc *sc, struct sk_buff *skb)
 
 		if(local_tsf >= (sc->rt_wifi_cur_tsf - RT_WIFI_TSF_SYNC_OFFSET)) {
 			// Process beacon information
-			i=2;
-			memcpy((unsigned char*)(&sc->rt_wifi_enable), (data+i), sizeof(int));
-			RT_WIFI_DEBUG("beacon rt_wifi_enabled: %u\n", sc->rt_wifi_enable);
 
-			i += sizeof(int)/*rt_wifi_enabled*/;
+
+			i = 2 + sizeof(int) /*headers + rt_wifi_enabled*/;
 			memcpy((unsigned char*)(&sc->rt_wifi_asn), (data+i), sizeof(int));
 			RT_WIFI_DEBUG("beacon asn: %u\n", sc->rt_wifi_asn);
 
