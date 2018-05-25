@@ -157,14 +157,17 @@ static struct ath_buf *ath9k_beacon_generate(struct ieee80211_hw *hw,
 		i = 2;
 		src = (unsigned char *)(&sc->rt_wifi_enable);
 		memcpy((tmp+i), src, sizeof(int));
+		RT_WIFI_DEBUG("Beacon rt_wifi_enabled: %u\n", sc->rt_wifi_enable);
 
 		i += sizeof(int);
 		src = (unsigned char *)(&sc->rt_wifi_bc_asn);
 		memcpy((tmp+i), src, sizeof(int));
+		RT_WIFI_DEBUG("Beacon asn: %u\n", sc->rt_wifi_bc_asn);
 
 		i += sizeof(int);
 		src = (unsigned char *)(&sc->rt_wifi_bc_tsf);
 		memcpy((tmp+i), src, sizeof(u64));
+		RT_WIFI_DEBUG("Beacon tsf: %u\n", sc->rt_wifi_bc_tsf);
 
 		i += sizeof(u64);
 		*(tmp+i) = RT_WIFI_TIME_SLOT_LEN;
@@ -172,6 +175,7 @@ static struct ath_buf *ath9k_beacon_generate(struct ieee80211_hw *hw,
 		i += 1;
 		src = (unsigned char *)(&sc->rt_wifi_superframe_size);
 		memcpy((tmp+i), src, sizeof(u16));
+		RT_WIFI_DEBUG("Beacon sf size: %u\n", sc->rt_wifi_superframe_size);
 	}
 #endif
 
