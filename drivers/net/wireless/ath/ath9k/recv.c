@@ -1533,9 +1533,7 @@ int ath_rx_tasklet(struct ath_softc *sc, int flush, bool hp)
 #ifdef CPTCFG_RT_WIFI
 		if (rs.is_mybeacon) {
 			if ((ah->opmode == NL80211_IFTYPE_STATION)) {
-				if (sc->rt_wifi_enable == 0) {
-					ath_rt_wifi_rx_beacon(sc, skb);
-				} else {
+				if (sc->rt_wifi_enable != 0) {
 					RT_WIFI_DEBUG("RT-WiFi enabled\n");
 					u64 local_tsf = ath9k_hw_gettsf64(ah);
 					u64 cur_virt_tsf = sc->rt_wifi_virt_start_tsf + (sc->rt_wifi_asn * sc->rt_wifi_slot_len);
@@ -1550,9 +1548,10 @@ int ath_rx_tasklet(struct ath_softc *sc, int flush, bool hp)
 						RT_WIFI_DEBUG("Restart station timer, L: %llu, V: %llu\n", local_tsf, cur_virt_tsf);
 						//RT_WIFI_DEBUG("Restart station timer");
 						ath9k_gen_timer_stop(sc->sc_ah, sc->rt_wifi_timer);
-						ath_rt_wifi_rx_beacon(sc, skb);
+						//ath_rt_wifi_rx_beacon(sc, skb);
 					}
 				}
+				ath_rt_wifi_rx_beacon(sc, skb);
 			}
 		}
 #endif
