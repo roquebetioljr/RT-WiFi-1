@@ -1541,6 +1541,11 @@ int ath_rx_tasklet(struct ath_softc *sc, int flush, bool hp)
 					u64 cur_virt_tsf = sc->rt_wifi_virt_start_tsf + (sc->rt_wifi_asn * sc->rt_wifi_slot_len);
 					s64 diff = (cur_virt_tsf - local_tsf);
 					s64 k_ap_restart_diff_offset = 200000;
+					RT_WIFI_DEBUG("local tsf: %llu\n", local_tsf);
+					RT_WIFI_DEBUG("rt_wifi vir start tsf: %llu\n", sc->rt_wifi_virt_start_tsf);
+					RT_WIFI_DEBUG("asn: %u\n", sc->rt_wifi_asn);
+					RT_WIFI_DEBUG("slot len: %u\n", sc->rt_wifi_slot_len);
+					RT_WIFI_DEBUG("curr virt tsf: %llu\n", cur_virt_tsf);
 					if (diff > k_ap_restart_diff_offset) {
 						RT_WIFI_DEBUG("Restart station timer, L: %llu, V: %llu\n", local_tsf, cur_virt_tsf);
 						//RT_WIFI_DEBUG("Restart station timer");
