@@ -474,13 +474,13 @@ void ath_rt_wifi_tx_analyse(struct ath_softc *sc, u16 is_lost)
 			{
 				RT_WIFI_DEBUG("RT_WIFI: lost packet checked. RT-WiFi ON.\n");
 			} else {
-				sc->rt_wifi_enable = 0;;
+				sc->rt_wifi_next_status = 0;
 				RT_WIFI_DEBUG("RT_WIFI: disabling RT-WiFi\n");
 			}
 		} else {
 			if( is_lost && sc->rt_wifi_lost_packet_buff > 0 )
 			{
-				sc->rt_wifi_enable = 1;
+				sc->rt_wifi_next_status = 1;
 				RT_WIFI_DEBUG("RT_WIFI: enabling RT-WiFi\n");
 			} else {
 				RT_WIFI_DEBUG("RT_WIFI: lost packet checked. RT-WiFi OFF.\n");

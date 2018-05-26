@@ -804,6 +804,7 @@ struct ath_softc {
 
 #ifdef CPTCFG_RT_WIFI
 	int rt_wifi_enable;
+	int rt_wifi_next_status; //0 - disable | 1 - enable
 	struct ath_gen_timer *rt_wifi_timer;
 
 	struct kfifo rt_wifi_fifo;

@@ -678,6 +678,7 @@ static void ath9k_init_rt_wifi(struct ath_softc *sc)
 	unsigned int fifo_size = sizeof(struct ath_buf*) * RT_WIFI_KFIFO_SIZE;
 	
 	sc->rt_wifi_enable = 0;
+	sc->rt_wifi_next_status = 0;
 	RT_WIFI_DEBUG("RT-WIFI: RT-WiFi disabled. Init.");
 	ret = kfifo_alloc(&sc->rt_wifi_fifo, fifo_size, GFP_KERNEL);
 	if (ret != 0) {
@@ -700,6 +701,7 @@ static void ath9k_deinit_rt_wifi(struct ath_softc *sc)
 	struct ath_buf *new_buf;
 
 	sc->rt_wifi_enable = 0;
+	sc->rt_wifi_next_status = 0;
 	RT_WIFI_DEBUG("RT-WIFI: Disabling RT-WiFi. Deinit.");
 
 	/* TODO: Not sure if the deinit is handled properly. */

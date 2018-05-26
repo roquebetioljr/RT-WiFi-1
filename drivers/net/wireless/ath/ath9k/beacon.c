@@ -143,8 +143,9 @@ static struct ath_buf *ath9k_beacon_generate(struct ieee80211_hw *hw,
 
 #ifdef CPTCFG_RT_WIFI
 	/* Append TDMA information to a beacon frame by vendor specific info. */
-	//if (sc->rt_wifi_enable == 1)
+	if (sc->rt_wifi_enable == 1 || sc->rt_wifi_enabled != sc->rt_wifi_next_status)
 	{
+		sc->rt_wifi_enable = sc->rt_wifi_next_status;
 		sc->rt_wifi_bc_tsf += RT_WIFI_BEACON_INTVAL;
 		sc->rt_wifi_bc_asn +=
 			RT_WIFI_BEACON_INTVAL / sc->rt_wifi_slot_len;
@@ -520,6 +521,7 @@ static void ath9k_beacon_config_ap(struct ath_softc *sc,
 		RT_WIFI_DEBUG("AP timer starts.\n");
 		ath_rt_wifi_ap_start_timer(sc, intval, nexttbtt);
 		sc->rt_wifi_enable = 0;
+		sc->rt_wifi_next_status = 0;
 		RT_WIFI_DEBUG("RT-WIFI: Config AP.");
 	}
 #endif
