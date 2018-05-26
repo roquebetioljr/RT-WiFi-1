@@ -143,7 +143,7 @@ static struct ath_buf *ath9k_beacon_generate(struct ieee80211_hw *hw,
 
 #ifdef CPTCFG_RT_WIFI
 	/* Append TDMA information to a beacon frame by vendor specific info. */
-	if (sc->rt_wifi_enable == 1 || sc->rt_wifi_enabled != sc->rt_wifi_next_status)
+	if (sc->rt_wifi_enable == 1 || sc->rt_wifi_enable != sc->rt_wifi_next_status)
 	{
 		sc->rt_wifi_enable = sc->rt_wifi_next_status;
 		sc->rt_wifi_bc_tsf += RT_WIFI_BEACON_INTVAL;
