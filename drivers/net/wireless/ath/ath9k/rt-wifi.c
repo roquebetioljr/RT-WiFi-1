@@ -52,8 +52,8 @@ static u32 rt_wifi_get_slot_len(u8 time_slot)
 		return 512;
 	} else if (time_slot == RT_WIFI_TIME_SLOT_256us) {
 		return 256;
-	} else if (time_slot == RT_WIFI_TIME_SLOT_4500kbps) {
-		return 834000;
+	} else if (time_slot == RT_WIFI_TIME_SLOT_128kb) {
+		return 19000; //19ms
 	} else {
 		RT_WIFI_ALERT("Unknown time slot!!!\n");
 		return 512;
