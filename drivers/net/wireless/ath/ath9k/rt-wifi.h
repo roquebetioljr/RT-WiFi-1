@@ -56,6 +56,7 @@
 #define RT_WIFI_TIME_SLOT_512us 7
 #define RT_WIFI_TIME_SLOT_256us 8
 #define RT_WIFI_TIME_SLOT_128us 9
+#define RT_WIFI_TIME_SLOT_4500kbps 10
 
 /* Macro for debugging */
 #ifdef RT_WIFI_DEBUG_ENABLE
