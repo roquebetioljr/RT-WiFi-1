@@ -317,15 +317,20 @@ void ath_rt_wifi_tasklet(struct ath_softc *sc)
 	int sched_offset;
 	struct ath_buf *new_buf = NULL;
 	u64 cur_hw_tsf;
-
+#if (RT_WIFI_AUTO_ACTIVATE_TDMA == 0)
 	if (sc->rt_wifi_enable == 0) {
-		//if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
-			//sc->rt_wifi_enable = 1;
-		//} else {
-			//RT_WIFI_DEBUG("RT_WIFI: not enable\n");
+		if (sc->sc_ah->opmode == NL80211_IFTYPE_AP) {
+			sc->rt_wifi_enable = 1;
+		} else {
+			RT_WIFI_DEBUG("RT_WIFI: not enable\n");
 			return;
-		//}
+		}
 	}
+#else
+	if (sc->rt_wifi_enable == 0) {
+			return;
+	}
+#endif
 	//RT_WIFI_DEBUG("RT_WIFI: enabled\n");
 
 	/* House keeping */

@@ -676,9 +676,13 @@ static void ath9k_init_rt_wifi(struct ath_softc *sc)
 {
 	int ret;
 	unsigned int fifo_size = sizeof(struct ath_buf*) * RT_WIFI_KFIFO_SIZE;
-	
+#if (RT_WIFI_AUTO_ACTIVATE_TDMA == 1)
 	sc->rt_wifi_enable = 0;
 	sc->rt_wifi_next_status = 0;
+#else //always enabled
+	sc->rt_wifi_enable = 1;
+	sc->rt_wifi_next_status = 1;
+#endif
 	RT_WIFI_DEBUG("RT-WIFI: RT-WiFi disabled. Init.");
 	ret = kfifo_alloc(&sc->rt_wifi_fifo, fifo_size, GFP_KERNEL);
 	if (ret != 0) {

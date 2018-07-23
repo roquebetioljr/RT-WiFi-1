@@ -2439,13 +2439,17 @@ static void ath_tx_complete(struct ath_softc *sc, struct sk_buff *skb,
 	if (!(tx_flags & ATH_TX_ERROR)) {
 		tx_info->flags |= IEEE80211_TX_STAT_ACK;
 #ifdef CPTCFG_RT_WIFI
+	#if (RT_WIFI_AUTO_ACTIVATE_TDMA == 1)
 		ath_rt_wifi_tx_analyse(sc, 0);
+	#endif
 #endif
 	}
 #ifdef CPTCFG_RT_WIFI
+	#if (RT_WIFI_AUTO_ACTIVATE_TDMA == 1)
 	else {
 		ath_rt_wifi_tx_analyse(sc, 1);
 	}
+	#endif
 #endif
 
 	padpos = ieee80211_hdrlen(hdr->frame_control);

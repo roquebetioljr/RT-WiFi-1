@@ -43,6 +43,8 @@
 #define RT_WIFI_NUM_OF_TRIES	1
 /* Whether the sender will wait for ACK or not */
 #define RT_WIFI_ENABLE_ACK	1
+/* Auto activate TDMA */
+#define RT_WIFI_AUTO_ACTIVATE_TDMA 0
 
 
 /* Debug or log information */

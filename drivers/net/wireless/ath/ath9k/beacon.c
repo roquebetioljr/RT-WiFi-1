@@ -520,8 +520,13 @@ static void ath9k_beacon_config_ap(struct ath_softc *sc,
 	} else {
 		RT_WIFI_DEBUG("AP timer starts.\n");
 		ath_rt_wifi_ap_start_timer(sc, intval, nexttbtt);
+#if (RT_WIFI_AUTO_ACTIVATE_TDMA == 0)
+		sc->rt_wifi_enable = 1;
+		sc->rt_wifi_next_status = 1;
+#else
 		sc->rt_wifi_enable = 0;
 		sc->rt_wifi_next_status = 0;
+#endif
 		RT_WIFI_DEBUG("RT-WIFI: Config AP.");
 	}
 #endif
