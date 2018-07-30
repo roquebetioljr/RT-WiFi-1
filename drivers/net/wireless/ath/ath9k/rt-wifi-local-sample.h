@@ -40,7 +40,7 @@
 /* co-existence */
 #define RT_WIFI_ENABLE_COEX	1
 /* # of in-slot transmission count */
-#define RT_WIFI_NUM_OF_TRIES	1
+#define RT_WIFI_NUM_OF_TRIES	1 //178 retries for 8KB | 2845 retries for 128kB
 /* Whether the sender will wait for ACK or not */
 #define RT_WIFI_ENABLE_ACK	1
 /* Auto activate TDMA */
