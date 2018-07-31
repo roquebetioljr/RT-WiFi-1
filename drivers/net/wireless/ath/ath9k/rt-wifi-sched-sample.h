@@ -38,7 +38,8 @@
 static struct rt_wifi_sta RT_WIFI_STAS[] = {
 	{ .mac_addr = {0xf4, 0xf2, 0x6d, 0x12, 0xc7, 0x78} },  // maq2
 	{ .mac_addr = {0x14, 0xCC, 0x20, 0x17, 0x2E, 0x41} },  // maq7
-	{ .mac_addr = {0x14, 0xCC, 0x20, 0x17, 0x38, 0x23} }   // m200
+	{ .mac_addr = {0x14, 0xCC, 0x20, 0x17, 0x38, 0x23} },  // m200
+	{ .mac_addr = {0xf4, 0xf2, 0x6d, 0x12, 0x06, 0x33} }
 };
 static u16 RT_WIFI_STAS_NUM = ARRAY_SIZE(RT_WIFI_STAS);
 
@@ -54,8 +55,10 @@ static struct rt_wifi_sched RT_WIFI_PRE_CONFIG_SCHED[] = {
 	{ .type = RT_WIFI_TX, 3,  .sta_id = 0x01 },
 	{ .type = RT_WIFI_RX, 4,  .sta_id = 0x02 },
 	{ .type = RT_WIFI_TX, 5,  .sta_id = 0x02 },
-	{ .type = RT_WIFI_BEACON, 6},
-	{ .type = RT_WIFI_BEACON, 7},
+	{ .type = RT_WIFI_RX, 6,  .sta_id = 0x03 },
+	{ .type = RT_WIFI_TX, 7,  .sta_id = 0x03 },
+	{ .type = RT_WIFI_BEACON, 8},
+	{ .type = RT_WIFI_BEACON, 9},
 };
 
 #endif /* RT_WIFI_SCHED_H */
