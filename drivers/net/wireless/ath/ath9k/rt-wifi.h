@@ -56,8 +56,7 @@
 #define RT_WIFI_TIME_SLOT_512us 7
 #define RT_WIFI_TIME_SLOT_256us 8
 #define RT_WIFI_TIME_SLOT_128us 9
-#define RT_WIFI_TIME_SLOT_8kb   10
-#define RT_WIFI_TIME_SLOT_128kb 11
+#define RT_WIFI_TIME_SLOT_809us 10
 
 /* Macro for debugging */
 #ifdef RT_WIFI_DEBUG_ENABLE
