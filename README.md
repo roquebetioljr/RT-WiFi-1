@@ -1,5 +1,21 @@
 # RT-WiFi
-RT-WiFi repo, to see the changes from the original driver to the modified RT-WiFi driver version.
+
+## What is This
+This the modified version of RT-WiFi for my Masters research.
+
+The RT-WiFi is an architecture to handle real-time communication in infrastructured IEEE 802.11 (WiFi) networks, designed to work in dense industrial environment with multiple networks using the same WiFi channel.
+
+It uses a technique that combines a TDMA scheduling with the increasing of the packet priority to provide a lower packet loss, even with alien networks interferences.
+
+## Papers
+
+* Concept: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8725178
+* Evaluation: https://sol.sbc.org.br/index.php/sbrc/article/view/7351/7235 (portuguese)
+
+
+## Some references
+
+This repo was forked from https://github.com/AlexisTM/RT-WiFi that implements a driver base on a research project also called RT-WiFi.
 
 Origin driver version.
 
